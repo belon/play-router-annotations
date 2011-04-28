@@ -36,8 +36,23 @@ public class RouterAnnotationsPlugin extends PlayPlugin {
 
     protected void computeRoutes() {
         List<Class> controllerClasses = getControllerClasses();
-        List<Method> gets = Java.findAllAnnotatedMethods(controllerClasses, Get.class);
-        for (Method get : gets) {
+		
+		List<Method> annotatedMethods = Java.findAllAnnotatedMethods(controllerClasses, Gets.class);
+        for (Method annotatedMethod : annotatedMethods) {
+            Gets annotation = annotatedMethod.getAnnotation(Gets.class);
+            if (annotation != null) {
+				for (int i = annotation.value().length-1; i >= 0; i--) {
+					Get get = annotation.value()[i];
+                    if (get.priority() != -1) {
+                        Router.addRoute(get.priority(), "GET", get.value(), annotatedMethod.getDeclaringClass().getSimpleName() + "." + annotatedMethod.getName(), getFormat(get.format()), get.accept());
+                    } else {
+                        Router.prependRoute("GET", get.value(), annotatedMethod.getDeclaringClass().getSimpleName() + "." + annotatedMethod.getName(), getFormat(get.format()), get.accept());
+                    }
+                }
+            }
+        }
+		List<Method> gets = Java.findAllAnnotatedMethods(controllerClasses, Get.class);
+		for (Method get : gets) {
             Get annotation = get.getAnnotation(Get.class);
             if (annotation != null) {
 
@@ -45,6 +60,21 @@ public class RouterAnnotationsPlugin extends PlayPlugin {
                     Router.addRoute(annotation.priority(), "GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), getFormat(annotation.format()), annotation.accept());
                 } else {
                     Router.prependRoute("GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), getFormat(annotation.format()), annotation.accept());
+                }
+            }
+        }
+		
+		annotatedMethods = Java.findAllAnnotatedMethods(controllerClasses, Posts.class);
+        for (Method annotatedMethod : annotatedMethods) {
+            Posts annotation = annotatedMethod.getAnnotation(Posts.class);
+            if (annotation != null) {
+				for (int i = annotation.value().length-1; i >= 0; i--) {
+					Post post = annotation.value()[i];
+                    if (post.priority() != -1) {
+                        Router.addRoute(post.priority(), "POST", post.value(), annotatedMethod.getDeclaringClass().getSimpleName() + "." + annotatedMethod.getName(), getFormat(post.format()), post.accept());
+                    } else {
+                        Router.prependRoute("POST", post.value(), annotatedMethod.getDeclaringClass().getSimpleName() + "." + annotatedMethod.getName(), getFormat(post.format()), post.accept());
+                    }
                 }
             }
         }
