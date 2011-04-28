@@ -49,7 +49,6 @@ public static void postForm(Long id) throws Exception {
    ...
 }
 
-
 The following annotations are supported at class level:
 
 * **@ServeStatic**
